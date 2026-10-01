@@ -11,6 +11,7 @@ PROJECT_ID = "churn-mlops-pipeline"
 BUCKET_NAME = "churn-mlops-pipeline-data-ckw"
 MODEL_BLOB = "models/model.joblib"
 LOCAL_MODEL_PATH = "model.joblib"
+NUMERIC_COLS = ["tenure", "MonthlyCharges", "TotalCharges"]
 
 def download_model():
     client = storage.Client(project=PROJECT_ID)
@@ -22,6 +23,7 @@ download_model()
 bundle = joblib.load(LOCAL_MODEL_PATH)
 model = bundle["model"]
 feature_columns = bundle["feature_columns"]
+scaler = bundle["scaler"]
 
 @app.get("/")
 def health():
@@ -52,6 +54,10 @@ class CustomerInput(BaseModel):
 def predict(customer: CustomerInput):
     input_df = pd.DataFrame([customer.dict()])
     input_encoded = pd.get_dummies(input_df)
+
+    # Apply the same scaling used during training
+    input_encoded[NUMERIC_COLS] = scaler.transform(input_encoded[NUMERIC_COLS])
+
     input_encoded = input_encoded.reindex(columns=feature_columns, fill_value=0)
 
     prediction = model.predict(input_encoded)[0]

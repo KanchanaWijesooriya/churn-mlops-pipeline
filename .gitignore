@@ -7,3 +7,5 @@ __pycache__/
 .env
 *.json
 !requirements.txt
+serving/model.joblib
+model.joblib

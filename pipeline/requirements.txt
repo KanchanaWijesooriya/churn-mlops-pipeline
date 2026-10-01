@@ -1,5 +1,5 @@
 apache-beam[gcp]
-scikit-learn
+scikit-learn==1.9.1
 pandas
 joblib
 google-cloud-storage

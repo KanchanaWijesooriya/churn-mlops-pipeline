@@ -36,7 +36,7 @@ def preprocess(df):
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
-    return X_train, X_test, y_train, y_test
+    return X_train, X_test, y_train, y_test, scaler
 
 def train_model(X_train, y_train):
     model = LogisticRegression(max_iter=1000)
@@ -53,9 +53,9 @@ def evaluate(model, X_test, y_test):
     }
     return metrics
 
-def save_model(model, feature_columns):
+def save_model(model, feature_columns, scaler):
     local_path = "model/artifacts/model.joblib"
-    joblib.dump({"model": model, "feature_columns": feature_columns}, local_path)
+    joblib.dump({"model": model, "feature_columns": feature_columns, "scaler": scaler}, local_path)
     client = storage.Client(project=PROJECT_ID)
     bucket = client.bucket(BUCKET_NAME)
     blob = bucket.blob("models/model.joblib")
@@ -64,8 +64,8 @@ def save_model(model, feature_columns):
 
 if __name__ == "__main__":
     df = load_data()
-    X_train, X_test, y_train, y_test = preprocess(df)
+    X_train, X_test, y_train, y_test, scaler = preprocess(df)
     model = train_model(X_train, y_train)
     metrics = evaluate(model, X_test, y_test)
     print("Metrics:", metrics)
-    save_model(model, feature_columns=X_train.columns.tolist())
+    save_model(model, feature_columns=X_train.columns.tolist(), scaler=scaler)
