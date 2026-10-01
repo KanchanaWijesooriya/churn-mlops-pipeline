@@ -1,0 +1,5 @@
+apache-beam[gcp]
+scikit-learn
+pandas
+joblib
+google-cloud-storage
